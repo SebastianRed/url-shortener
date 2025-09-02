@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acortador de URLs</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Acortador de URLs 🔗</h1>
+        <p>Introduce tu URL larga y obtén una versión corta para compartir.</p>
+        
+        <div class="input-section">
+            <input type="text" id="longUrlInput" placeholder="Pega tu URL larga aquí..." required>
+            <button id="shortenButton">Acortar URL</button>
+        </div>
+        
+        <div id="resultSection" class="result-section hidden">
+            <p>Tu URL corta es:</p>
+            <input type="text" id="shortenedUrlOutput" readonly>
+            <button id="copyButton">Copiar</button>
+        </div>
+        
+        <div id="errorMessage" class="error-message hidden">
+            ¡Ocurrió un error! Inténtalo de nuevo.
+        </div>
+        
+        <footer class="footer">
+            <p>Acortador de URLs - Spring Boot</p>
+            <p>Sebastián Rojo - Chile 🇨🇱</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
