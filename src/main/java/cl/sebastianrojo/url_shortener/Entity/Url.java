@@ -22,7 +22,7 @@ public class Url {
     private String shortUrl;
 
     @Column(name = "access_count", nullable = false)
-    private Integer accessCount;
+    private Long accessCount = 0L;
 
     public Url() {
     }
@@ -30,7 +30,6 @@ public class Url {
     public Url(String originalUrl, String shortUrl) {
         this.originalUrl = originalUrl;
         this.shortUrl = shortUrl;
-        this.accessCount = 0;
     }
     
     public Long getId() {
@@ -57,11 +56,11 @@ public class Url {
         this.shortUrl = shortUrl;
     }
 
-    public Integer getAccessCount() {
+    public Long getAccessCount() {
         return accessCount;
     }
 
-    public void setAccessCount(Integer accessCount) {
+    public void setAccessCount(Long accessCount) {
         this.accessCount = accessCount;
     }
 
