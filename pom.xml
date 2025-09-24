@@ -12,7 +12,7 @@
 	<artifactId>url-shortener</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>url-shortener</name>
-	<description>Demo project for Spring Boot</description>
+	<description>Proyecto acortador de URLs con Spring Boot</description>
 	<url/>
 	<licenses>
 		<license/>
@@ -38,11 +38,13 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
-
 		<dependency>
-			<groupId>com.h2database</groupId>
-			<artifactId>h2</artifactId>
-			<scope>runtime</scope>
+    		<groupId>org.xerial</groupId>
+    		<artifactId>sqlite-jdbc</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate.orm</groupId>
+			<artifactId>hibernate-community-dialects</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
