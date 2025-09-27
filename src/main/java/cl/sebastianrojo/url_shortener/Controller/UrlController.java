@@ -26,7 +26,7 @@ public class UrlController {
         return ResponseEntity.ok("http://localhost:8080/" + shortUrl);
     }
 
-    @GetMapping("/{shortUrl}")
+    @GetMapping("/{shortUrl:[a-zA-Z0-9]{6}}")
     public RedirectView redirect(@PathVariable String shortUrl) {
         Optional<Url> urlOpt = urlService.getOriginalUrl(shortUrl);
         if (urlOpt.isPresent()) {
