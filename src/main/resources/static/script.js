@@ -1,52 +1,34 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const longUrlInput = document.getElementById('longUrlInput');
-    const shortenButton = document.getElementById('shortenButton');
-    const resultSection = document.getElementById('resultSection');
-    const shortenedUrlOutput = document.getElementById('shortenedUrlOutput');
-    const copyButton = document.getElementById('copyButton');
+document.getElementById('urlForm').addEventListener('submit', async function(event) {
+    event.preventDefault();
+
+    const originalUrl = document.getElementById('originalUrl').value;
+    const resultContainer = document.getElementById('resultSection');
+    const shortUrlLink = document.getElementById('shortUrl');
     const errorMessage = document.getElementById('errorMessage');
 
-    shortenButton.addEventListener('click', async () => {
-        const originalUrl = longUrlInput.value.trim();
+    console.log(originalUrl);
 
-        if (!originalUrl) {
-            showError("Por favor, introduce una URL válida.");
-            return;
-        }
+    resultContainer.style.display = 'none';
+    errorMessage.style.display = 'none';
 
-        try {
-            const response = await fetch('/api/v1/shorten', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'text/plain' // La API espera texto plano
-                },
-                body: originalUrl
-            });
+    try {
+        const response = await fetch('http://localhost:8080/shorten', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'text/plain'
+            },
+            body: originalUrl
+        });
 
-            if (!response.ok) {
-                throw new Error('Error al acortar la URL');
-            }
-
+        if (response.ok) {
             const shortUrl = await response.text();
-            shortenedUrlOutput.value = shortUrl;
-            resultSection.classList.remove('hidden');
-            errorMessage.classList.add('hidden'); // Ocultar errores si hubo
-        } catch (error) {
-            console.error('Error:', error);
-            showError("No se pudo acortar la URL. Revisa que sea válida.");
-            resultSection.classList.add('hidden'); // Ocultar resultado si hubo error
+            shortUrlLink.href = shortUrl;
+            shortUrlLink.textContent = shortUrl;
+            resultContainer.style.display = 'block';
+        } else {
+            errorMessage.style.display = 'block';
         }
-    });
-
-    copyButton.addEventListener('click', () => {
-        shortenedUrlOutput.select();
-        shortenedUrlOutput.setSelectionRange(0, 99999); // Para móviles
-        document.execCommand('copy');
-        alert('¡URL corta copiada al portapapeles!');
-    });
-
-    function showError(message) {
-        errorMessage.textContent = message;
-        errorMessage.classList.remove('hidden');
+    } catch (error) {
+        errorMessage.style.display = 'block';
     }
 });
