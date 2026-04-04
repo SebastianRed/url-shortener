@@ -1,4 +1,4 @@
-package cl.sebastianrojo.url_shortener.Entity;
+package cl.sebastianrojo.url_shortener.entity;
 
 import java.time.LocalDateTime;
 

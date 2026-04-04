@@ -25,13 +25,11 @@ public class UrlService {
  
     @Autowired
     private UrlRepository urlRepository;
- 
-    // ── Crear o reutilizar una URL corta ─────────────────────────────────────
+
     @Transactional
     public UrlResponse shortenUrl(ShortenRequest request) {
         String originalUrl = request.getUrl().trim();
- 
-        // Si ya existe, devuelve la misma
+
         return urlRepository.findByOriginalUrl(originalUrl)
                 .map(this::toResponse)
                 .orElseGet(() -> {
@@ -40,8 +38,7 @@ public class UrlService {
                     return toResponse(saved);
                 });
     }
- 
-    // ── Obtener URL original e incrementar contador ──────────────────────────
+
     @Transactional
     public String resolveUrl(String shortUrl) {
         Url url = urlRepository.findByShortUrl(shortUrl)
@@ -52,8 +49,7 @@ public class UrlService {
  
         return url.getOriginalUrl();
     }
- 
-    // ── Obtener estadísticas de una URL corta ────────────────────────────────
+
     @Transactional(readOnly = true)
     public UrlResponse getStats(String shortUrl) {
         Url url = urlRepository.findByShortUrl(shortUrl)
@@ -61,7 +57,6 @@ public class UrlService {
         return toResponse(url);
     }
  
-    // ── Helpers ──────────────────────────────────────────────────────────────
     private String generateUniqueShortUrl() {
         String shortUrl;
         do {
