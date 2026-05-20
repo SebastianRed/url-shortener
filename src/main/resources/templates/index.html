@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SNIP — Acortador de URLs</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            primary: {
+              50: '#f0f4ff',
+              100: '#d9e2ff',
+              600: '#4f46e5',
+              700: '#4338ca',
+            }
+          }
+        },
+      },
+    };
+
+    // Script para manejar el tema antes de cargar el body
+    if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      document.documentElement.classList.add('dark')
+    } else {
+      document.documentElement.classList.remove('dark')
+    }
+  </script>
+
+  <style>
+    body { transition: background-color 0.3s ease, color 0.3s ease; }
+    .result-card { opacity: 0; display: none; }
+    .result-card.show {
+      display: block;
+      animation: slideDown 0.4s ease forwards;
+    }
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans min-h-screen">
+
+  <header class="sticky top-0 z-40 w-full border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur">
+    <div class="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
+      
+      <a href="/" class="flex items-center gap-2">
+        <div class="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center shadow-lg shadow-primary-600/20">
+          <span class="text-white font-bold text-lg">S</span>
+        </div>
+        <span class="font-bold tracking-tight text-xl">SNIP</span>
+      </a>
+
+      <div class="flex items-center gap-4">
+        <nav class="hidden sm:flex items-center gap-6 text-sm font-medium text-slate-600 dark:text-slate-400">
+          <a href="#shorten" class="hover:text-primary-600 transition-colors">Acortar</a>
+          <a href="#stats" class="hover:text-primary-600 transition-colors">Estadísticas</a>
+        </nav>
+        
+        <button id="themeToggle" class="p-2 rounded-full border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+            <svg id="sunIcon" class="hidden dark:block w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.364l-.707-.707M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            <svg id="moonIcon" class="block dark:hidden w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-3xl mx-auto px-6 py-16">
+    <div class="text-center mb-16">
+      <h1 class="text-4xl sm:text-6xl font-extrabold text-slate-900 dark:text-white mb-6 tracking-tight">
+        Enlaces cortos, <span class="text-primary-600">mejor impacto.</span>
+      </h1>
+      <p class="text-lg text-slate-600 dark:text-slate-400 max-w-xl mx-auto">
+        Simplifica tus URLs en segundos. Rápido, seguro y con estadísticas detalladas de cada clic.
+      </p>
+    </div>
+
+    <section id="shorten" class="mb-20">
+      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl shadow-slate-200/50 dark:shadow-none p-6 sm:p-8">
+        <form id="shortenForm" class="space-y-4">
+          <div class="space-y-2">
+            <label for="urlInput" class="text-sm font-semibold text-slate-700 dark:text-slate-300">Introduce tu URL larga</label>
+            <div class="flex flex-col sm:flex-row gap-3">
+              <input
+                id="urlInput"
+                type="text"
+                placeholder="ejemplo.com/mi-enlace-muy-largo"
+                class="flex-1 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary-600 focus:border-transparent outline-none transition-all"
+              />
+              <button
+                type="submit"
+                id="submitBtn"
+                class="bg-primary-600 hover:bg-primary-700 text-white font-bold py-3 px-8 rounded-xl transition-all shadow-lg shadow-primary-600/20 flex items-center justify-center gap-2"
+              >
+                <span id="btnIcon">⚡</span>
+                <span id="btnText">Acortar</span>
+                <svg id="btnSpinner" class="hidden w-5 h-5 animate-spin text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/></svg>
+              </button>
+            </div>
+            <p id="inputError" class="text-sm text-red-500 hidden mt-2">⚠ <span id="inputErrorText">URL inválida</span></p>
+          </div>
+        </form>
+
+        <div id="resultCard" class="result-card mt-8 border border-primary-100 dark:border-primary-900/30 bg-primary-50/50 dark:bg-primary-900/10 rounded-xl p-6">
+          <div class="flex items-center justify-between mb-4">
+            <span id="resultBadge" class="text-xs font-bold uppercase tracking-wider px-2 py-1 rounded bg-primary-100 dark:bg-primary-900 text-primary-600 dark:text-primary-400">Nuevo</span>
+            <span id="resultDate" class="text-xs text-slate-500">hace un momento</span>
+          </div>
+          
+          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div class="overflow-hidden">
+              <a id="resultShortUrl" href="#" target="_blank" class="text-2xl font-bold text-primary-600 hover:underline break-all">—</a>
+              <p id="resultOriginalUrl" class="text-sm text-slate-500 truncate mt-1 max-w-xs sm:max-w-md">—</p>
+            </div>
+            <button id="copyBtn" onclick="copyShortUrl()" class="w-full sm:w-auto flex items-center justify-center gap-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-700 transition-all">
+              <span id="copyText">Copiar</span>
+            </button>
+          </div>
+
+          <div class="mt-6 pt-6 border-t border-slate-200 dark:border-slate-800 grid grid-cols-2 gap-4 text-center">
+            <div>
+              <p class="text-xs text-slate-500 uppercase font-bold">Clics</p>
+              <p id="resultAccess" class="text-lg font-bold text-slate-900 dark:text-white">0</p>
+            </div>
+            <div>
+              <p class="text-xs text-slate-500 uppercase font-bold">Código</p>
+              <p id="resultCode" class="text-lg font-bold text-slate-900 dark:text-white">—</p>
+            </div>
+          </div>
+        </div>
+
+        <div id="errorCard" class="hidden mt-6 bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-900/30 p-4 rounded-xl text-red-600 dark:text-red-400 text-sm">
+            <p id="errorMsg">Error inesperado</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="stats">
+      <div class="flex items-center gap-4 mb-6">
+        <h2 class="text-2xl font-bold">Consultar estadísticas</h2>
+        <div class="h-px flex-1 bg-slate-200 dark:bg-slate-800"></div>
+      </div>
+
+      <form id="statsForm" class="flex gap-2">
+        <input id="statsInput" type="text" maxlength="6" placeholder="Código (ej. aZ91kL)" 
+               class="flex-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-2 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary-600 outline-none transition-all"/>
+        <button id="statsBtn" type="submit" class="bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 px-6 py-2 rounded-xl font-semibold hover:opacity-90 transition-all">
+          Ver
+        </button>
+      </form>
+
+      <div id="statsResult" class="hidden mt-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden shadow-sm">
+        <div class="p-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 flex justify-between">
+            <span class="font-bold text-sm">Información del enlace</span>
+            <span id="statsCode" class="text-xs font-mono bg-primary-100 dark:bg-primary-900 text-primary-600 px-2 py-0.5 rounded">...</span>
+        </div>
+        <div class="p-4 space-y-4">
+            <div class="flex justify-between text-sm">
+                <span class="text-slate-500">Destino:</span>
+                <a id="statsOriginal" href="#" class="text-primary-600 hover:underline truncate ml-4">...</a>
+            </div>
+            <div class="flex justify-between text-sm">
+                <span class="text-slate-500">Total clics:</span>
+                <span id="statsAccess" class="font-bold">...</span>
+            </div>
+            <div id="statsBar" class="w-full bg-slate-100 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
+                <div id="statsBarFill" class="bg-primary-600 h-full transition-all duration-1000" style="width: 0%"></div>
+            </div>
+        </div>
+      </div>
+      
+      <div id="statsError" class="hidden mt-4 text-center p-4 text-slate-500 text-sm italic">
+        No se encontró ningún enlace con ese código.
+      </div>
+    </section>
+  </main>
+
+  <footer class="mt-20 border-t border-slate-200 dark:border-slate-800 py-10 text-center">
+    <p class="text-sm text-slate-500">&copy; 2026 SNIP URL Shortener · <span class="text-primary-600">sebastianrojo.cl</span></p>
+  </footer>
+
+  <script th:inline="javascript">
+    // --- Lógica del Switch de Tema ---
+    const themeToggle = document.getElementById('themeToggle');
+    themeToggle.addEventListener('click', () => {
+      if (document.documentElement.classList.contains('dark')) {
+        document.documentElement.classList.remove('dark');
+        localStorage.theme = 'light';
+      } else {
+        document.documentElement.classList.add('dark');
+        localStorage.theme = 'dark';
+      }
+    });
+
+    // --- El resto de tu lógica original de API se mantiene igual ---
+    const API_BASE = '';
+    const shortenForm = document.getElementById('shortenForm');
+    const urlInput = document.getElementById('urlInput');
+    const submitBtn = document.getElementById('submitBtn');
+    const btnText = document.getElementById('btnText');
+    const btnSpinner = document.getElementById('btnSpinner');
+    const resultCard = document.getElementById('resultCard');
+    const errorCard = document.getElementById('errorCard');
+
+    function setLoading(loading) {
+      submitBtn.disabled = loading;
+      btnSpinner.classList.toggle('hidden', !loading);
+      btnText.textContent = loading ? 'Procesando...' : 'Acortar';
+    }
+
+    function formatDate(isoStr) {
+      if (!isoStr) return '—';
+      return new Date(isoStr).toLocaleDateString('es-CL', { day:'2-digit', month:'short', year:'numeric' });
+    }
+
+    shortenForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const raw = urlInput.value.trim();
+      if(!raw) return;
+      
+      setLoading(true);
+      resultCard.classList.remove('show');
+      errorCard.classList.add('hidden');
+
+      try {
+        const res = await fetch(`${API_BASE}/shorten`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url: raw.startsWith('http') ? raw : 'https://' + raw }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message);
+
+        document.getElementById('resultShortUrl').textContent = data.fullShortUrl;
+        document.getElementById('resultShortUrl').href = data.fullShortUrl;
+        document.getElementById('resultOriginalUrl').textContent = data.originalUrl;
+        document.getElementById('resultCode').textContent = data.shortUrl;
+        document.getElementById('resultAccess').textContent = data.accessCount;
+        document.getElementById('resultDate').textContent = formatDate(data.createdAt);
+        
+        resultCard.classList.add('show');
+      } catch (err) {
+        document.getElementById('errorMsg').textContent = err.message;
+        errorCard.classList.remove('hidden');
+      } finally {
+        setLoading(false);
+      }
+    });
+
+    function copyShortUrl() {
+      const url = document.getElementById('resultShortUrl').textContent;
+      navigator.clipboard.writeText(url).then(() => {
+        const copyText = document.getElementById('copyText');
+        copyText.textContent = '¡Copiado!';
+        setTimeout(() => copyText.textContent = 'Copiar', 2000);
+      });
+    }
+
+    // --- Lógica de estadísticas simplificada para el ejemplo ---
+    const statsForm = document.getElementById('statsForm');
+    statsForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const code = document.getElementById('statsInput').value.trim();
+        const statsResult = document.getElementById('statsResult');
+        const statsError = document.getElementById('statsError');
+        
+        try {
+            const res = await fetch(`${API_BASE}/stats/${code}`);
+            const data = await res.json();
+            if(!res.ok) throw new Error();
+
+            document.getElementById('statsCode').textContent = data.shortUrl;
+            document.getElementById('statsOriginal').textContent = data.originalUrl;
+            document.getElementById('statsOriginal').href = data.originalUrl;
+            document.getElementById('statsAccess').textContent = data.accessCount;
+            document.getElementById('statsBarFill').style.width = Math.min(100, data.accessCount) + '%';
+            
+            statsResult.classList.remove('hidden');
+            statsError.classList.add('hidden');
+        } catch {
+            statsResult.classList.add('hidden');
+            statsError.classList.remove('hidden');
+        }
+    });
+  </script>
+</body>
+</html>
